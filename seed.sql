@@ -5,21 +5,21 @@ CREATE DATABASE employee_trackerDB;
 USE employee_trackerDB;
 
 CREATE TABLE department (
-    id INTEGER(4) AUTO_INCREMENT,
-    name VARCHAR(45) NULL,
+    id int AUTO_INCREMENT,
+    deptName VARCHAR(45) NOT NULL,
     PRIMARY KEY (id)
 );
 
-CREATE TABLE role (
-    id INTEGER(4) AUTO_INCREMENT,
-    title VARCHAR(45) NULL,
-    salary INTEGER(9) NULL,
-    department_id INTEGER(4) NULL,
+CREATE TABLE roles (
+    id int AUTO_INCREMENT,
+    title VARCHAR(45) NOT NULL,
+    salary INTEGER(9) NOT NULL,
+    department_name VARCHAR(45) NOT NULL,
     PRIMARY KEY (id)
 );
 
 CREATE TABLE employee (
-    id INTEGER(4) NOT NULL,
+    id int AUTO_INCREMENT,
     first_name VARCHAR(45) NULL,
     last_name VARCHAR(45) NULL,
     role_id INTEGER(4) NULL,

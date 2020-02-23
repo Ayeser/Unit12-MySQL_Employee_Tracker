@@ -2,8 +2,6 @@ const mysql = require("mysql");
 const inquirer = require("inquirer");
 const cTable = require("console.table");
 
-const PORT = process.env.PORT || 8080;
-
 const connection = mysql.createConnection({
     host: "localhost",
 
@@ -14,30 +12,23 @@ const connection = mysql.createConnection({
     user: "root",
 
     // Your password
-    password: "root",
+    password: "",
     database: "employee_trackerdb"
 });
 
-connection.connect(function (err) {
-    if (err) {
-        console.error("error connecting: " + err.stack);
-        return;
-    }
-    console.log("connected as id " + connection.threadId);
-});
-
-try {inquirer
-    .prompt([
-        {
-            type: "list",
-            message: "What would you like to do?",
-            choices: ["Add department", "Add role", "Add employee", "View departments", "View roles", "View employees", "Update employee role"],
-            name: "set"
-        }
-    ])
+function startInput() {
+try{
+    inquirer
+        .prompt([
+            {
+                type: "list",
+                message: "What would you like to do?",
+                choices: ["Add department", "Add role", "Add employee", "View departments", "View roles", "View employees", "Update employee role", "Exit application"],
+                name: "set"
+            }
+        ])
     .then(function (response) {
         console.log("Great! Next step...");
-        console.log(response.set);
         if (response.set === "Add department") {
             inquirer.prompt([
                 {
@@ -45,17 +36,16 @@ try {inquirer
                     message: "What is the name of the department",
                     name: "department"
                 }
+            ])
                     .then(function (response) {
-                        const query = connection.query(
-                            "INSERT INTO department (name) + VALUES (" + name + ")", function (err, res) {
+                        console.log(response.department);
+                        connection.query(`INSERT INTO department (deptName) VALUES ('${response.department}')`, function (err, res) {
                                 if (err) throw err;
                             }
-                        )
-                        console.log("Department Successfully added! Departments are now: ")
-                        console.log(query.sql);
-                        connection.end();
+                        );
+                        console.log("Department Successfully added!");
+                        startInput();
                     })
-            ])
         }
 
         if (response.set === "Add role") {
@@ -77,14 +67,13 @@ try {inquirer
                 }
             ])
                 .then(function (response) {
-                    const query = connection.query(
-                        "INSERT INTO role (title, salary, department_id) + VALUES (" + response.title, response.salary, response.department_name + ")", function (err, res) {
+                    connection.query(
+                        `INSERT INTO role (title salary department_name) VALUES ("${response.title} ${response.salary} ${response.department_name}")`, function (err, res) {
                             if (err) throw err;
                         }
-                    )
-                    console.log("Department Successfully added! Departments are now: ")
-                    console.log(query.sql);
-                    connection.end();
+                    );
+                    console.log("Role successfully added!");
+                    startInput();
                 })
         }
 
@@ -113,11 +102,11 @@ try {inquirer
             ])
                 .then(function (response) {
                     const query = connection.query(
-                        "INSERT INTO employee (id, first_name, last_name, role_id, manager_id) + VALUES (" + response.first_name, response.last_name, response.role_id, response.manager_id + ")", function (err, res) {
+                        `INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ("${response.first_name}, ${response.last_name}, ${response.role_id}, ${response.manager_id}")`, function (err, res) {
                             if (err) throw err;
                         }
                     )
-                    console.log("Department Successfully added! Departments are now: ")
+                    console.log("Employee successfully added!")
                     console.log(query.sql);
                     connection.end();
 
@@ -174,20 +163,24 @@ try {inquirer
             ])
                 .then(function (response) {
                     const query = connection.query(
-                        "UPDATE employee (first_name, last_name, role_id, manager_id) + set first_name - " + response.first_name + " last_name = " + response.last_name + " role_id = " + response.role_id + " manager_id = " + response.manager_id + " WHERE id = ", function (err, res) {
+                        `UPDATE employee (first_name, last_name, role_id, manager_id) + set first_name - " ${response.first_name} " last_name = " + ${response.last_name} + " role_id = " + ${response.role_id} + " manager_id = " + ${response.manager_id} + " WHERE id = 1`, function (err, res) {
                             if (err) throw err;
                         }
                     )
-                    console.log(query.sql);
-                    console.table(query.sql);
                     connection.end();
                 })
         }
 
+        if (response.set === "Exit application") {
+            connection.end();
+        }
+
     })
 
-
-    catch(error) {
+}
+    catch (error) {
         console.error(error);
     };
+};
 
+startInput();
